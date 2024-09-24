@@ -7,6 +7,8 @@ find_package(SQLite3 REQUIRED)
 
 include_directories(${SQLite3_INCLUDE_DIR})
 
-add_executable(Note_task_job main.cpp DatabaseManager.cpp DatabaseManager.h Note.cpp Note.h NoteManager.cpp NoteManager.h Application.cpp Application.h)
+add_executable(Note_task_job main.cpp DatabaseManager.cpp DatabaseManager.h Note.cpp Note.h NoteManager.cpp NoteManager.h Application.cpp Application.h
+        NoteSearchManager.cpp
+        NoteSearchManager.h)
 
 target_link_libraries(Note_task_job ${SQLite3_LIBRARIES})

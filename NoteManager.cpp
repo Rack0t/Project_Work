@@ -3,6 +3,7 @@
 //
 
 #include "NoteManager.h"
+#include "NoteSearchManager.h"
 #include <iostream>
 
 NoteManager::NoteManager(DatabaseManager &dbMgr) : dbManager(dbMgr) {}
@@ -26,6 +27,13 @@ void NoteManager::addNote(const Note &note) {
     if (rc != SQLITE_DONE){
         std::cerr << "Ошибка выполнения: " << sqlite3_errmsg(db) << "\n";
     } else {
+        // Получаем ID последней добавленной записи
+        int lastId = sqlite3_last_insert_rowid(db);
+
+        // Добавляем запись в FTS таблицу для поиска
+        NoteSearchManager searchManager(dbManager);
+        searchManager.insertNoteForSearch(lastId, note.content);
+
         std::cout << "Заметка успешно добавлена\n";
     }
 

@@ -5,6 +5,8 @@
 #include "Application.h"
 #include <iostream>
 
+#include "NoteSearchManager.h"
+
 Application::Application() : dbManager("notes.db"), noteManager(dbManager) {}
 
 void Application::run() {
@@ -31,6 +33,7 @@ void Application::run() {
                 deleteNote();
                 break;
             case 4:
+                searchNotes();
                 break;
             case 5:
                 std::cout << "Выход из программы...\n";
@@ -51,6 +54,8 @@ void Application::addNewNote() {
         content += line + "\n";
     }
 
+    NoteSearchManager searchManager(dbManager); // Создание FTS-таблицы, если её нет
+    searchManager.createFTSTable();
     Note newNote(content);
     noteManager.addNote(newNote);
 }
@@ -60,4 +65,15 @@ void Application::deleteNote() {
     std::cout << "Введите ID заметки для удаления: ";
     std::cin >> id;
     noteManager.deleteNoteById(id);
+}
+
+void Application::searchNotes() {
+    NoteSearchManager searchManager(dbManager);
+    searchManager.createFTSTable(); // Создание FTS-таблицы, если её нет
+
+    std::string query;
+    std::cout << "Введите поисковый запрос: " << std::endl;
+    std::cin.ignore();  // Очищаем буфер
+    std::getline(std::cin, query);
+    searchManager.searchNotes(query);   // Выполняем поиск
 }

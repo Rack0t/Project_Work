@@ -17,6 +17,7 @@ public:
     void run();
     void addNewNote();
     void deleteNote();
+    void searchNotes();
 };
 
 #endif //NOTE_TASK_JOB_APPLICATION_H
