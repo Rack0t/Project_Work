@@ -11,9 +11,12 @@
 class NoteManager {
 private:
     DatabaseManager& dbManager;
+    sqlite3_stmt* stmtInsertNote;
+    sqlite3_stmt* stmtDeleteNote;
 
 public:
     NoteManager(DatabaseManager& dbMgr);
+    ~NoteManager();
     void addNote(const Note& note);
     void viewAllNotes();
     void deleteNoteById(int id);

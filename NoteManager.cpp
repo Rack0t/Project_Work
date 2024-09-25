@@ -6,38 +6,50 @@
 #include "NoteSearchManager.h"
 #include <iostream>
 
-NoteManager::NoteManager(DatabaseManager &dbMgr) : dbManager(dbMgr) {}
-
-void NoteManager::addNote(const Note &note) {
-    sqlite3* db = dbManager.getDB();
-    sqlite3_stmt* stmt;
-    std::string sqlInsert = "INSERT INTO NOTES (DATE, USER, CONTENT) VALUES (?, ?, ?);";
-
-    int rc = sqlite3_prepare_v2(db, sqlInsert.c_str(), -1, &stmt, NULL);
-    if (rc != SQLITE_OK){
-        std::cerr << "Не удалось подготовить запрос: " << sqlite3_errmsg(db) << "\n";
-        return;
+NoteManager::NoteManager(DatabaseManager &dbMgr) : dbManager(dbMgr) {
+    // Подготавливаем  выражение для добавления заметки
+    std::string sqlInsert  =  "INSERT INTO NOTES (USER, DATE,  CONTENT)  VALUES  (?,  ?, ?);";
+    int rc = sqlite3_prepare_v2(dbManager.getDB(), sqlInsert.c_str(), -1, &stmtInsertNote, NULL);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Ошибка подготовки выражения для добавления заметки: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
     }
 
-    sqlite3_bind_text(stmt, 1, note.date.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, note.user.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 3, note.content.c_str(), -1, SQLITE_STATIC);
+    // Подготавливаем выражение для удаления заметки
+    std::string sqlDelete = "DELETE FROM NOTES WHERE ID = ?;";
+    rc = sqlite3_prepare_v2(dbManager.getDB(), sqlDelete.c_str(), -1, &stmtDeleteNote, NULL);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Ошибка подготовки выражения для удаления заметки: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
+    }
+}
 
-    rc = sqlite3_step(stmt);
+// Освобождение подготовленных выражений в деструкторе
+NoteManager::~NoteManager() {
+    sqlite3_finalize(stmtInsertNote);
+    sqlite3_finalize(stmtDeleteNote);
+}
+void NoteManager::addNote(const Note &note) {
+    // Сброс параметров перед новым использованием
+    sqlite3_reset(stmtInsertNote);
+
+    // Привязываем параметры
+    sqlite3_bind_text(stmtInsertNote, 1, note.date.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmtInsertNote, 2, note.user.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmtInsertNote, 3, note.content.c_str(), -1, SQLITE_STATIC);
+
+    // Выполняем подготовленное выражение
+    int rc = sqlite3_step(stmtInsertNote);
     if (rc != SQLITE_DONE){
-        std::cerr << "Ошибка выполнения: " << sqlite3_errmsg(db) << "\n";
+        std::cerr << "Ошибка выполнения: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
     } else {
         // Получаем ID последней добавленной записи
-        int lastId = sqlite3_last_insert_rowid(db);
+        int lastId = sqlite3_last_insert_rowid(dbManager.getDB());
 
         // Добавляем запись в FTS таблицу для поиска
         NoteSearchManager searchManager(dbManager);
         searchManager.insertNoteForSearch(lastId, note.content);
 
-        std::cout << "Заметка успешно добавлена\n";
+        std::cout << "Заметка успешно добавлена" << std::endl;
     }
-
-    sqlite3_finalize(stmt);
 }
 
 void NoteManager::viewAllNotes() {
@@ -51,38 +63,29 @@ void NoteManager::viewAllNotes() {
     // azColName - массив с названиями столбцов
     auto callback = [](void* NotUsed, int argc, char** argv, char** azColName) -> int {
         for (int i = 0; i < argc; i++) {
-            std::cout << azColName[i] << ":" << (argv[i] ? argv[i] : "NULL") << "\n";
+            std::cout << azColName[i] << ":" << (argv[i] ? argv[i] : "NULL") << std::endl;
         }
-        std::cout << "---------------------------------------\n";
+        std::cout << "---------------------------------------" << std::endl;
         return 0;
     };
 
     // Выполняем SQL-запрос для получения всех записей из таблицы NOTES
     int rc = sqlite3_exec(db, sqlSelect, callback, 0, &errMsg);
     if (rc != SQLITE_OK) {
-        std::cerr << "Ошибка SQL: " << errMsg << "\n";
+        std::cerr << "Ошибка SQL: " << errMsg << std::endl;
         sqlite3_free(errMsg);
     }
+    // Не нужно финализировать выражение, так как мы его будем использовать повторно
 }
 
 void NoteManager::deleteNoteById(int id) {
-    sqlite3* db = dbManager.getDB();
-    std::string sqlDelete = "DELETE FROM NOTES WHERE ID = ?;";
+    sqlite3_reset(stmtDeleteNote); // Сброс для повторного использования
+    sqlite3_bind_int(stmtDeleteNote, 1, id); // Привязываем ID
 
-    sqlite3_stmt* stmt;
-    int rc = sqlite3_prepare_v2(db, sqlDelete.c_str(), -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        std::cerr << "Не удалось подготовить запрос: " << sqlite3_errmsg(db) << "\n";
-        return;
-    }
-
-    // Привязываем ID к запросу
-    sqlite3_bind_int(stmt, 1, id);
-    rc = sqlite3_step(stmt);
+    int rc = sqlite3_step(stmtDeleteNote);
     if (rc != SQLITE_DONE) {
-        std::cerr << "Ошибка удаления записи: " << sqlite3_errmsg(db) << "\n";
+        std::cerr << "Ошибка удаления заметки: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
     } else {
-        std::cout << "Запись успешно удалена\n";
+        std::cout << "Заметка успешно удалена" << std::endl;
     }
-    sqlite3_finalize(stmt);
 }

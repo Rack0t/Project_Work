@@ -9,10 +9,10 @@
 DatabaseManager::DatabaseManager(const std::string &dbName) {
     int rc = sqlite3_open(dbName.c_str(),&db);
     if (rc){
-        std::cerr << "Не удалось открыть базу данных: " << sqlite3_errmsg(db) << "\n";
+        std::cerr << "Не удалось открыть базу данных: " << sqlite3_errmsg(db) << std::endl;
         exit(1);
     } else {
-        std::cout << "База данных открыта успешно\n";
+        std::cout << "База данных открыта успешно" << std::endl;
     }
 
     const char* sqlCreateTable = "CREATE TABLE IF NOT EXISTS NOTES("
@@ -22,7 +22,7 @@ DatabaseManager::DatabaseManager(const std::string &dbName) {
                                  "CONTENT TEXT NOT NULL);";
     rc = sqlite3_exec(db, sqlCreateTable, 0, 0, &errMsg);
     if (rc != SQLITE_OK) {
-        std::cerr << "Ошибка SQL: " << errMsg << "\n";
+        std::cerr << "Ошибка SQL: " << errMsg << std::endl;
         sqlite3_free(errMsg);
     }
 }

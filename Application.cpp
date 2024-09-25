@@ -12,12 +12,12 @@ Application::Application() : dbManager("notes.db"), noteManager(dbManager) {}
 void Application::run() {
     int choice;
     do {
-        std::cout << "\nМеню:\n";
-        std::cout << "1. Добавить новую заметку или отчет\n";
-        std::cout << "2. Просмотреть все заметки и отчеты\n";
-        std::cout << "3. Удалить заметку или отчет\n";
-        std::cout << "4. Поиск по заметкам и отчетам\n";
-        std::cout << "5. Выход\n";
+        std::cout << std::endl << "Меню:" << std::endl;
+        std::cout << "1. Добавить новую заметку или отчет" << std::endl;
+        std::cout << "2. Просмотреть все заметки и отчеты" << std::endl;
+        std::cout << "3. Удалить заметку или отчет" << std::endl;
+        std::cout << "4. Поиск по заметкам и отчетам" << std::endl;
+        std::cout << "5. Выход" << std::endl;
         std::cout << "Введите ваш выбор: ";
         std::cin >> choice;
         std::cin.ignore(); // Очищаем буфер обмена
@@ -36,17 +36,17 @@ void Application::run() {
                 searchNotes();
                 break;
             case 5:
-                std::cout << "Выход из программы...\n";
+                std::cout << "Выход из программы..." << std::endl;
                 break;
             default:
-                std::cout << "Неверный выбор. Попробуйте снова.\n";
+                std::cout << "Неверный выбор. Попробуйте снова." << std::endl;
         }
     } while (choice != 5);
 }
 
 void Application::addNewNote() {
     std::string content;
-    std::cout << "Введите вашу заметку или отчет (завершите ввод строкой с одной точкой '.'): \n";
+    std::cout << "Введите вашу заметку или отчет (завершите ввод строкой с одной точкой '.'): " << std::endl;
     std::string line;
     while (std::getline(std::cin, line)){
         if (line == ".")
