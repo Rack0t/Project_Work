@@ -73,7 +73,7 @@ void Application::searchNotes() {
 
     std::string query;
     std::cout << "Введите поисковый запрос: " << std::endl;
-    std::cin.ignore();  // Очищаем буфер
+    //std::cin.ignore(1, '\n');  // Очищаем буфер
     std::getline(std::cin, query);
     searchManager.searchNotes(query);   // Выполняем поиск
 }

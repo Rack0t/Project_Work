@@ -9,7 +9,8 @@
 
 NoteSearchManager::NoteSearchManager(DatabaseManager &dbMgr) : dbManager(dbMgr) {
     // Подготавливаем выражение для поиска заметок
-    std::string sqlSearch = "SELECT ID, CONTENT FROM NOTES_FTS WHERE CONTENT LIKE '%' || ? || '%';";
+    //std::string sqlSearch = "SELECT ID, CONTENT FROM NOTES_FTS WHERE CONTENT LIKE '%' || ? || '%';";
+    std::string sqlSearch = "SELECT ID, CONTENT FROM NOTES_FTS WHERE CONTENT MATCH ?;";
     int rc = sqlite3_prepare_v2(dbManager.getDB(), sqlSearch.c_str(), -1, &stmtSearchNote, NULL);
     if (rc != SQLITE_OK) {
         std::cerr << "Ошибка подготовки выражения для поиска заметок: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
