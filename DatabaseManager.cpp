@@ -25,6 +25,13 @@ DatabaseManager::DatabaseManager(const std::string &dbName) {
         std::cerr << "Ошибка SQL: " << errMsg << std::endl;
         sqlite3_free(errMsg);
     }
+
+    const char* sqlCreateFTSTable = "CREATE VIRTUAL TABLE IF NOT EXISTS NOTES_FTS USING fts5(ID, CONTENT, tokenize = 'unicode61');";
+    rc = sqlite3_exec(db, sqlCreateFTSTable, 0, 0, &errMsg);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Ошибка создания FTS таблицы: " << errMsg << std::endl;
+        sqlite3_free(errMsg);
+    }
 }
 
 DatabaseManager::~DatabaseManager() {

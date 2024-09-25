@@ -18,7 +18,7 @@ private:
 public:
     NoteSearchManager(DatabaseManager& dbMgr);
     ~NoteSearchManager();
-    void createFTSTable();
+    //void createFTSTable();
     void insertNoteForSearch(int id, const std::string& content);
     void searchNotes(const std::string& query);
     void deleteNoteFromFTS(int id);

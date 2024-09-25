@@ -37,10 +37,11 @@ NoteSearchManager::~NoteSearchManager() {
 }
 
 
+/*
 // Создание FTS-таблицы для полнотекстового поиска
 void NoteSearchManager::createFTSTable() {
     sqlite3* db = dbManager.getDB();
-    const char *sqlCreateFTS = "CREATE VIRTUAL TABLE IF NOT EXISTS NOTES_FTS USING fts5(ID, CONTENT);";
+    const char *sqlCreateFTS = "CREATE VIRTUAL TABLE IF NOT EXISTS NOTES_FTS USING fts5(ID, CONTENT, tokenize = 'unicode61');";
     char* errMsg = 0;
     int rc = sqlite3_exec(db, sqlCreateFTS, 0, 0, &errMsg);
     if (rc != SQLITE_OK) {
@@ -50,6 +51,7 @@ void NoteSearchManager::createFTSTable() {
         std::cout << "FTS таблица успешно создана" << std::endl;
     }
 }
+*/
 
 // Вставка заметок в FTS таблицу для последующего поиска
 void NoteSearchManager::insertNoteForSearch(int id, const std::string &content) {

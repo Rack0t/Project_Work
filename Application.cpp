@@ -54,8 +54,8 @@ void Application::addNewNote() {
         content += line + "\n";
     }
 
-    NoteSearchManager searchManager(dbManager); // Создание FTS-таблицы, если её нет
-    searchManager.createFTSTable();
+    //NoteSearchManager searchManager(dbManager); // Создание FTS-таблицы, если её нет
+    //searchManager.createFTSTable();
     Note newNote(content);
     noteManager.addNote(newNote);
 }
@@ -69,7 +69,7 @@ void Application::deleteNote() {
 
 void Application::searchNotes() {
     NoteSearchManager searchManager(dbManager);
-    searchManager.createFTSTable(); // Создание FTS-таблицы, если её нет
+    //searchManager.createFTSTable(); // Создание FTS-таблицы, если её нет
 
     std::string query;
     std::cout << "Введите поисковый запрос: " << std::endl;
