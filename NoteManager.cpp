@@ -8,7 +8,7 @@
 
 NoteManager::NoteManager(DatabaseManager &dbMgr) : dbManager(dbMgr) {
     // Подготавливаем  выражение для добавления заметки
-    std::string sqlInsert  =  "INSERT INTO NOTES (USER, DATE,  CONTENT)  VALUES  (?,  ?, ?);";
+    std::string sqlInsert  =  "INSERT INTO NOTES (DATE, USER,  CONTENT)  VALUES  (?,  ?, ?);";
     int rc = sqlite3_prepare_v2(dbManager.getDB(), sqlInsert.c_str(), -1, &stmtInsertNote, NULL);
     if (rc != SQLITE_OK) {
         std::cerr << "Ошибка подготовки выражения для добавления заметки: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
@@ -86,6 +86,10 @@ void NoteManager::deleteNoteById(int id) {
     if (rc != SQLITE_DONE) {
         std::cerr << "Ошибка удаления заметки: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
     } else {
-        std::cout << "Заметка успешно удалена" << std::endl;
+        std::cout << "Заметка успешно удалена из основной таблицы" << std::endl;
+
+        // Удаляем заметку также из FTS
+        NoteSearchManager searchManager(dbManager);
+        searchManager.deleteNoteFromFTS(id);
     }
 }

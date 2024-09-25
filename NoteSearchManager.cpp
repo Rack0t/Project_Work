@@ -22,12 +22,18 @@ NoteSearchManager::NoteSearchManager(DatabaseManager &dbMgr) : dbManager(dbMgr) 
         std::cerr << "Ошибка подготовки запроса: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
     }
 
+    std::string sqlDeleteFTS = "DELETE FROM NOTES_FTS WHERE rowid = ?;";
+    rc = sqlite3_prepare_v2(dbManager.getDB(), sqlDeleteFTS.c_str(), -1, &stmtDeleteFTSNote, NULL);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Ошибка подготовки выражения для удаления заметки из FTS: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
+    }
 }
 
 // Освобождение ресурсов
 NoteSearchManager::~NoteSearchManager() {
     sqlite3_finalize(stmtSearchNote);
     sqlite3_finalize(stmtInsertNoteForSearch);
+    sqlite3_finalize(stmtDeleteFTSNote);
 }
 
 
@@ -77,3 +83,16 @@ void NoteSearchManager::searchNotes(const std::string &query) {
         std::cout << "----------------------------------------" << std::endl;
     }
 }
+
+void NoteSearchManager::deleteNoteFromFTS(int id) {
+    sqlite3_reset(stmtDeleteFTSNote);
+    sqlite3_bind_int(stmtDeleteFTSNote, 1, id);
+
+    int rc = sqlite3_step(stmtDeleteFTSNote);
+    if (rc != SQLITE_DONE) {
+        std::cerr << "Ошибка удаления заметки из FTS: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
+    } else {
+        std::cout << "Заметка успешно удалена из FTS: " << std::endl;
+    }
+}
+
